@@ -1,0 +1,148 @@
+
+from Compiler.GC.types import *
+from Compiler.circuit import *
+from Compiler.util import *
+from Compiler.library import *
+from Compiler.types import *
+from Compiler.compilerLib import Compiler
+from decimal import *
+from mpmath import *
+from bitwise_sampler.ostack import *
+from bitwise_sampler.laplace_sampler_direct import *
+from bitwise_sampler.laplace_sampler_ostack import *
+from bitwise_sampler.gaussian_sampler_ostack import *
+from bitwise_sampler.AND_gate_counter import *
+from bitwise_sampler.test import *
+from plot_lib.line_plot import plot_res
+import numpy as np
+import os 
+
+
+def get_queries(n, k, data_path):
+    sbk = sbitint.get_type(k)
+    queries = Array(n, sbk)
+    @for_range(n)
+    def _(i):
+        queries[i] = sbk(0)
+    return queries
+
+usage = "usage: %prog [options] [args]"
+compiler = Compiler(usage=usage)
+
+# mechanism
+compiler.parser.add_option('--mechanism', type=str, default='dlap',
+                    help='specify the mechanism: dlap or dgauss')
+compiler.parser.add_option('--metric', type=str, default='both',
+                    help='specify which metric to use: and/bits/both')
+compiler.parser.add_option('--compile_only', type=int, default=0,
+                    help='directly compute the number of AND gates when compiling')
+                    
+
+# privacy & security pararmeters
+compiler.parser.add_option('--epsilon', type=float, default=math.log(2) * 2 ** (-3),
+                    help='specify the differential privacy parameter, epsilon')
+
+compiler.parser.add_option('--sensitivity', type=float, default=1.0,
+                    help='specify the differential privacy parameter, sensitivity')
+
+compiler.parser.add_option('--lambd', type=int, default=128,
+                    help='specify the security parameter')
+
+compiler.parser.add_option('--monotonic', type=int, default=False,
+                    help='specify the monotony of rnm')
+
+# security allocation
+compiler.parser.add_option('--r1', type=float, default=1,
+                    help='the ratio of lambda for truncation')
+
+compiler.parser.add_option('--r2', type=float, default=1,
+                    help='the ratio of lambda for representation of bias')
+
+compiler.parser.add_option('--r3', type=float, default=1,
+                    help='the ratio of lambda for cpush')
+
+compiler.parser.add_option('--r4', type=float, default=0.25,
+                    help='the ratio of lambda for reject smapling')
+
+# input & output settings
+compiler.parser.add_option('--data_path', type=str, default='',
+                    help='specify the path of input data for aggregation')
+
+compiler.parser.add_option('--n', type=int, default=4096,
+                    help='specify the length of generated noise')
+
+compiler.parser.add_option('--num_party', type=int, default=3,
+                    help='specify the number of computation parties')
+
+# ostack settings
+compiler.parser.add_option('--ostack', type=int, default=True,
+                    help='use ostack')
+
+compiler.parser.add_option('--num_real', type=int, default=3,
+                    help='specify the threshold to use periodic ostack, which is determined by epsilon')
+
+compiler.parser.add_option('--periodic', type=int, default=True,
+                    help='use approximation to speed up')
+
+compiler.parser.add_option('--recusion', type=int, default=False,
+                    help='using recusion or iteration in Ostack, iteration is faster')
+
+compiler.parse_args()
+
+@compiler.register_function('test-sampling-main')
+def test_sampling_main():
+    t = compiler.options.sensitivity / compiler.options.epsilon
+    k = int(ceil(math.log2(t * ((compiler.options.lambd + 2 + math.log2(compiler.options.n)) - ln(1 + exp(1 / t))) * ln(2))))
+    plain_queries = get_queries(compiler.options.n, k+1, compiler.options.data_path)
+
+    if compiler.options.compile_only:
+        def compare_and_gates(lambd_range, n_range):
+            res_list = np.zeros((5, len(lambd_range), len(n_range)))
+            for i, lambd in enumerate(lambd_range):
+                for j, n in enumerate(n_range):
+                    compiler.options.lambd = lambd
+                    compiler.options.n = n
+                    compiler.options.epsilon = 0.1
+                    c = counter(compiler.options, plain_queries)
+                    perio, ostack, direct, push, dng, perio_bit, ostack_bit, direct_bit, push_bit = c.pre_and_gate(compiler.options.n, 'dlap')
+                    perio_gauss, ostack_gauss, direct_gauss, push_gauss, dng_gauss, perio_bit_gauss, ostack_bit_gauss, direct_bit_gauss, push_bit_gauss = c.pre_and_gate(compiler.options.n, 'dgauss')
+                    if compiler.options.metric == 'both':
+                        res_list[0][i][j], res_list[1][i][j], res_list[2][i][j], res_list[3][i][j], res_list[4][i][j] = direct+3*direct_bit, perio+3*perio_bit, ostack+3*ostack_bit, direct_gauss+3*direct_bit_gauss, ostack_gauss+3*ostack_bit_gauss
+                    elif compiler.options.metric == 'and':
+                        res_list[0][i][j], res_list[1][i][j], res_list[2][i][j], res_list[3][i][j], res_list[4][i][j] = direct, perio, ostack, direct_gauss, ostack_gauss
+                    else:
+                        res_list[0][i][j], res_list[1][i][j], res_list[2][i][j], res_list[3][i][j], res_list[4][i][j] = 3*direct_bit, 3*perio_bit, 3*ostack_bit, 3*direct_bit_gauss, 3*ostack_bit_gauss
+           
+            return res_list
+        lambd_range = [64, 128, 192, 256, 320, 384, 448, 512, 576, 640]
+        n_range = [2**4, 2**6, 2**8, 2**10, 2**12, 2**14, 2**16, 2**18]
+        # eps_range = [0.001, 0.01, 0.1, 1, 10]
+        outflie = f'outfile_exp1_{compiler.options.metric}.npy'
+        if os.path.exists(outflie):
+            res = np.load(outflie)
+        else:
+            res = compare_and_gates(lambd_range, n_range)
+            np.save(outflie, res)
+        plot_res(res, lambd_range, n_range, compiler.options.metric)
+    
+    else:
+        if compiler.options.mechanism == 'dlap':
+
+            if not compiler.options.ostack:
+                sa = laplace_sampler_direct(compiler.options)
+                ans = sa.discrete_laplace_geo_direct()
+
+            elif compiler.options.ostack:
+                sa = laplace_sampler_ostack(compiler.options)
+                ans = sa.discrete_laplace_geo_ostack()
+
+        elif compiler.options.mechanism == 'dgauss':
+            sa = gauss_sampler_ostack(compiler.options)
+            ans = sa.discrete_gaussian_dlap_rejection_ostack()
+
+        else:
+            raise NotImplementedError(compiler.options.mechanism)
+    
+
+if __name__ == "__main__":
+    compiler.compile_func()
