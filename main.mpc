@@ -1,0 +1,143 @@
+from Compiler.GC.types import *
+from Compiler.circuit import *
+from Compiler.util import *
+from Compiler.library import *
+from Compiler.types import *
+from Compiler.compilerLib import Compiler
+from Compiler.program import Program
+from decimal import *
+from mpmath import *
+from plot_lib.line_plot import plot_res
+import numpy as np
+from primitives_mpc import bitwise_sample, distributed_sample
+import os
+
+usage = "usage: %prog [options] [args]"
+compiler = Compiler(usage=usage)
+
+# mechanism
+
+compiler.parser.add_option(
+    "--type",
+    type=str,
+    default="bitwise",
+    help="bitwise, dng, dng_semi, trans",
+)
+compiler.parser.add_option(
+    "--mechanism",
+    type=str,
+    default="lap",
+    help="specify the mechanism: lap or gauss",
+)
+compiler.parser.add_option(
+    "--compile_only",
+    type=int,
+    default=0,
+    help="directly compute the number of AND gates when compiling",
+)
+compiler.parser.add_option(
+    "--bin",
+    type=int,
+    default=1,
+    help="underlining protocol is binary or arithmetic?",
+)
+
+# privacy & security pararmeters
+compiler.parser.add_option(
+    "--epsilon",
+    type=float,
+    default=0.1, 
+    help="specify the dp parameter, epsilon",
+)
+
+compiler.parser.add_option(
+    "--delta",
+    type=float,
+    default=1e-5, 
+    help="specify the dp parameter for gaussian, delta",
+)
+
+compiler.parser.add_option(
+    "--sensitivity",
+    type=float,
+    default=1.0,
+    help="specify the dp parameter, sensitivity",
+)
+
+compiler.parser.add_option(
+    "--lambd", type=int, default=128, help="specify the security parameter"
+)
+
+# security allocation
+compiler.parser.add_option(
+    "--r1", type=float, default=1, help="the ratio of lambda for truncation"
+)
+
+compiler.parser.add_option(
+    "--r2", type=float, default=1, help="the ratio of lambda for representation of bias"
+)
+
+compiler.parser.add_option(
+    "--r3", type=float, default=1, help="the ratio of lambda for cpush"
+)
+
+compiler.parser.add_option(
+    "--r4", type=float, default=1, help="the ratio of lambda for reject smapling"
+)
+
+# input & output settings
+
+compiler.parser.add_option(
+    "--n", type=int, default=4096, help="specify the number of noise to sample"
+)
+
+compiler.parser.add_option(
+    "--num_party", type=int, default=3, help="specify the number of computation parties"
+)
+
+# ostack settings
+compiler.parser.add_option(
+    "--ostack", 
+    type=int, 
+    default=1, 
+    help="use ostack"
+)
+
+compiler.parser.add_option(
+    "--num_real",
+    type=int,
+    default=3,
+    help="specify the threshold to use periodic ostack, which is determined by epsilon",
+)
+
+compiler.parser.add_option(
+    "--periodic", type=int, default=False, help="use periodic approximation to speed up"
+)
+
+compiler.parser.add_option(
+    "--recusion",
+    type=int,
+    default=False,
+    help="using recusion or iteration in Ostack, iteration is faster",
+)
+
+compiler.parse_args()
+
+@compiler.register_function("test-sampling-main")
+def test_sampling_main():
+
+    args = compiler.options
+    if args.type == 'bitwise':
+        samples = bitwise_sample(mechanism=args.mechanism, n=args.n, s=args.sensitivity, epsilon=args.epsilon, delta=args.delta, lambd=args.lambd, num_party=args.num_party, ostack=args.ostack, approximation=args.periodic, r=(args.r1, args.r2, args.r3, args.r4), binary=args.bin)
+
+    elif args.type == 'dng':
+        samples = distributed_sample(mechanism=args.mechanism, n=args.n, s=args.sensitivity, epsilon=args.epsilon, delta=args.delta, lambd=args.lambd, num_party=args.num_party, check=1, binary=args.bin)
+
+    elif args.type == 'dngsemi':
+        samples = distributed_sample(mechanism=args.mechanism, n=args.n, s=args.sensitivity, epsilon=args.epsilon, delta=args.delta, lambd=args.lambd, num_party=args.num_party, check=0, binary=args.bin)
+
+    elif args.type == 'trans':
+        pass
+
+if __name__ == "__main__":
+    compiler.compile_func()
