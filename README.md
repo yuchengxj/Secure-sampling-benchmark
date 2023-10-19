@@ -14,6 +14,11 @@ Compile a sampling protocol with binary computation. Set parameters for main.mpc
 ```
 python main.mpc -B 64
 ```
+For arithmetics protocols, compile with `-bin 0`.
+
+```
+python main.mpc -F 64 -bin 0
+```
 
 Run the protocol and see the time and communication.
 ```
@@ -27,11 +32,7 @@ make yao-party.x
 bash Scripts/yao.sh -v test-sampling-main -IF <path of input random bits or partial noise> 
 ```
 
-For arithmetics protocols, compile with `-bin 0`.
 
-```
-python main.mpc -F 64 -bin 0
-```
 
 ### Use MPC-DP Benchmark as a Library
 
