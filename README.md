@@ -5,7 +5,7 @@ This is the code of paper 'Benchmarking Secure Sampling Protocols for Differenti
 
 ### MP-SPDZ set-up
 
-Should have MP-SPDZ correctly installed, see its documnet [MP-SDPZ framework](https://mp-spdz.readthedocs.io/en/latest) for installation.
+Should have MP-SPDZ correctly installed, see its [documnet](https://mp-spdz.readthedocs.io/en/latest) for installation.
 
 
 ### Run Evaluation
