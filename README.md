@@ -37,6 +37,7 @@ make yao-party.x
 bash Scripts/yao.sh -v test-sampling-main -IF <path of input random bits or partial noise> 
 ```
 
+To view the comparison of protocols, run `python exp/plot_line`. Or use `bash exp/compare.sh` to re-execute all the protocols and plot (it is time-consuming).
 
 
 ### Use MPC-DP Benchmark as a Library
