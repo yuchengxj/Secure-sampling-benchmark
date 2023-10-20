@@ -44,7 +44,6 @@ To view the comparison of protocols, run `python exp/plot_line`. Or use `bash ex
 
 Import ```primitives_mpc``` into your code written with MP-SDPZ and use `binary=1` for binary and `binary=0` for arithmetics protocols.
 ```python
-
 from primitives_mpc import
 
 X = Array(n, sint)
@@ -52,5 +51,4 @@ X = Array(n, sint)
 # Your code saving statistical results in secret Array X 
 
 noised_X = X + primitives_mpc.bitwise_sample(n=n, mechanism='lap', binary=1)
-
 ```
