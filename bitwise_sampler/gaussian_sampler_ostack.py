@@ -42,7 +42,9 @@ class gauss_sampler_ostack(laplace_sampler_ostack):
             1,
         )
         self.N = (1 << self.k) + 1
+        self.sbk = sbitint.get_type(self.k+1)
 
+        
     def trial_times(self, n, p, delta):
         k1 = n / p
         k2 = (-log2(delta)) * log(2) / (2 * p**2)
@@ -116,15 +118,13 @@ class gauss_sampler_ostack(laplace_sampler_ostack):
 
             @for_range(m // g)
             def _(l):
-                output_bits = self.make_batch(u, g, bias, self.acc, -1)
-                exps = output_bits.PURGE()
+                exps = self.ostack_bernoulli(u, g, bias, self.acc, -1)
 
                 @for_range(g)
                 def _(c):
                     coins[l * g * length + c * length + j] = exps[c]
 
-            output_bits = self.make_batch(v, q, bias, self.acc, -1)
-            exps = output_bits.PURGE()
+            exps = self.ostack_bernoulli(v, q, bias, self.acc, -1)
 
             @for_range(q)
             def _(c):
@@ -240,10 +240,10 @@ class gauss_sampler_ostack(laplace_sampler_ostack):
             @if_((accepts[i].reveal()))
             def _():
                 out_list[i%self.n] = samples[i]
-        # for i in range(self.n):
-        #     print_ln(
-        #             "dgauss: %s", out_list[i].reveal()
-        #         )
+        for i in range(self.n):
+            print_ln(
+                    "%s", out_list[i].reveal()
+                )
         return out_list
         
                 

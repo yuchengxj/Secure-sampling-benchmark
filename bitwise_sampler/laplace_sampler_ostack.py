@@ -6,13 +6,13 @@ from Compiler.types import *
 from decimal import *
 from mpmath import *
 from bitwise_sampler.ostack import *
-from bitwise_sampler.noise_sampler import sampler
+from bitwise_sampler.basic_sampler import basic_sampler
 import re
 
 
-class laplace_sampler_ostack(sampler):
+class laplace_sampler_ostack(basic_sampler):
     def __init__(self, args, queries=None) -> None:
-        sampler.__init__(self, args, queries)
+        basic_sampler.__init__(self, args, queries)
         self.num_real = args.num_real
         self.periodic = args.periodic
         p = exp(1 / self.t)
@@ -209,7 +209,7 @@ class laplace_sampler_ostack(sampler):
         t: the scaler of laplace
         lambd: security parameter λ
         g: batch size
-        u: number of push in make batch
+        u: number of push in ostack bernoulli
         acc: the length of binary expansion of p
         k = O(log(λ+logd))
         g = lambd + log(k) + log(d) (must be 3*(2^i-1), i = 1, 2, 3, ...)
@@ -262,15 +262,13 @@ class laplace_sampler_ostack(sampler):
 
             @for_range(n // g)
             def _(l):
-                output_bits = self.make_batch(u, g, bias, self.acc, j - num_real)
-                geos = output_bits.PURGE()
+                geos = self.ostack_bernoulli(u, g, bias, self.acc, j - num_real)
 
                 @for_range(g)
                 def _(c):
                     coins[l * g * self.k + c * self.k + j] = geos[c]
 
-            output_bits = self.make_batch(v, q, bias, self.acc, j - num_real)
-            geos = output_bits.PURGE()
+            geos = self.ostack_bernoulli(v, q, bias, self.acc, j - num_real)
 
             @for_range(q)
             def _(c):
@@ -300,7 +298,7 @@ class laplace_sampler_ostack(sampler):
             @for_range(n)
             def _(j):
                 laps[j] = signs[j].if_else(-laps[j], laps[j])
-                # print_ln("%s get dlap: %s", j.reveal(), laps[j].reveal())
+                print_ln("%s", laps[j].reveal())
             return laps
         else:
             return signs, laps

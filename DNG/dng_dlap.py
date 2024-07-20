@@ -60,9 +60,9 @@ class dlap_generator(object):
                 partial_noise = self.sbl.get_input_from(i)
                 partial_noise = sign.if_else(partial_noise, -partial_noise)
                 dlaps[j] = dlaps[j] + partial_noise
-        # @for_range(self.n)
-        # def _(i):
-        #     print_ln("get dlap: %s", dlaps[i].reveal())
+        @for_range(self.n)
+        def _(i):
+            print_ln("%s", dlaps[i].reveal())
         return dlaps 
     
     def KS_test_discrete(self, D, binary=1):

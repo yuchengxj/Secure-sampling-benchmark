@@ -1,6 +1,6 @@
 import numpy as np
 import random
-from transformation.config import config
+from TRANS.config import config
 from mpmath import *
 from math import exp, log2, log, ceil, sqrt
 from scipy.stats import nbinom
@@ -13,14 +13,19 @@ class log_generator(object):
         self.partial_noise, self.output_path = conf.partial_noise, conf.output_path
         self.t = conf.sensitivity / conf.epsilon
         p = exp(1 / self.t)
-        self.k = int(ceil(log2(self.t * ((self.lambd + 1 + log2(self.n)) - log2(1 + p)) * log(2))))
+        # 在transformation生成dlap时，统计距离主要来自sfix的 截断 和 离散化 操作
+        # 根据统计距离来确定的指标只有 k： sfix.set_precision(k)，随后是保持不变的
+        self.k = max(int(ceil(log2(self.t * ((self.lambd + 1 + log2(self.n)) - log2(1 + p)) * log(2)))),5)
         self.N = 2 ** self.k + 1
 
-        self.u = self.lambd + self.k + ceil(log2(self.n))
+        # 搞清楚如何算u！
+        self.u = self.lambd + ceil(log2(self.n))
+        # self.u = 8
         print(f'fraction part {self.u}')
         print(f'k derived from allocating lambda to truncation: {self.k}')
         print(f'mod clip N: {self.N}')
-    
+        
+        # 小数部分要多长，取决于需要多精准地表达 uniform sample
         sfix.set_precision(self.u, self.k + self.u)
         self.sfixu = sfix
         self.sbk = sbitint.get_type(self.k)
@@ -30,10 +35,10 @@ class log_generator(object):
         @for_range(self.n)
         def _(i):
             uniform_list[i] = self.sfixu(0)
-        for i in range(self.m):
-            @for_range(self.n)
-            def _(j):
+        for i in range(3):
+            for j in range(self.n):
                 uniform_list[j] = uniform_list[j] ^ sfix.get_input_from(i)
+                uniform_list[j] = self.sfixu(random.random())
                 print_ln("%s", uniform_list[j].reveal())
         return  uniform_list
     
@@ -43,15 +48,14 @@ class log_generator(object):
         return intpart
     
     def log_transformation(self, uniform_list1, uniform_list2):
-        a = mpc_math.log_fx(uniform_list1[0], exp(1)) 
         dlap = Array(self.n, self.sbk)
-        # @for_range(1)
+        # @for_range(self.n)
         # def _(i):
         #     a = mpc_math.log_fx(uniform_list1[i], exp(1)) 
         #     b = mpc_math.log_fx(uniform_list2[i], exp(1)) 
         #     print_ln("u:%s, a:%s", uniform_list1[i].reveal(), a.reveal())
-        #     dlap[i] = self.round(-self.t * a) - self.round(-1/self.t * b)
-        #     print_ln("%s",dlap[i].reveal())
+        #     dlap[i] = self.round(self.t * a) - self.round(self.t * b)
+        #     print_ln("get lap: %s",dlap[i].reveal())
         return dlap
     
     def generate_dlap(self):
@@ -82,3 +86,5 @@ config.epsilon = float(sys.argv[6])
 generator = log_generator(config)
 partial_randomness(config.output_path, config.n*10, config.num_party, generator.u)
 generator.generate_dlap()
+
+

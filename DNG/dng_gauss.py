@@ -61,6 +61,17 @@ class dgauss_generator(object):
         noise = self.sample_from_gauss()
         self.output_pn_to_clients(noise)
 
+    def simulate_aggregate_discrete(self, simulate):
+        print("!!!!!!!!!!")
+        for s in range(simulate):
+            print(f"{s} colluded")
+            scale = self.n / (self.n - s)
+            self.sigma = math.sqrt(scale) * self.sigma
+            noise = self.sample_from_gauss()
+            noise = np.sum(noise, axis=0)
+            for i in range(self.n):
+                print(noise[i])
+
     def aggregate_discrete(self):
         dlaps = Array(self.n, self.sbl)
 
@@ -77,9 +88,9 @@ class dgauss_generator(object):
                 partial_noise = sign.if_else(partial_noise, -partial_noise)
                 dlaps[j] = dlaps[j] + partial_noise
 
-        # @for_range(self.n)
-        # def _(i):
-        #     print_ln("get dgauss: %s", dlaps[i].reveal())
+        @for_range(self.n)
+        def _(i):
+            print_ln("%s", dlaps[i].reveal())
 
         return dlaps
 

@@ -6,7 +6,7 @@ from Compiler.types import *
 from decimal import *
 from mpmath import *
 from bitwise_sampler.ostack import *
-from bitwise_sampler.noise_sampler import sampler
+from bitwise_sampler.basic_sampler import basic_sampler
 from bitwise_sampler.laplace_sampler_ostack import laplace_sampler_ostack
 
         
@@ -22,6 +22,62 @@ class counter(laplace_sampler_ostack):
     def __init__(self, args, queries=None) -> None:
         laplace_sampler_ostack.__init__(self, args, queries)
         self.l = None
+
+    def optimal_g(self, n, r, t, l=None):
+        min_push_time, min_random_bit, opt_g, opt_q, opt_u, opt_v = 0, 0, 0, 0, 0, 0
+        max_level = math.floor(math.log2(n / 3 + 1))
+        for i in range(1, max_level + 1):
+            g = 3 * (2**i - 1)
+            rem = n % g
+            u = self.push_times(n - rem, g, r)
+            q = 0
+            for j in range(1, i + 1):
+                tmp = 3 * (2**j - 1)
+                if tmp >= rem:
+                    q = tmp
+                    break
+            v = self.push_times(rem, q, r, l)
+            total_push_time = self.get_and_gate(u, g, t, l) * math.floor(
+                n / g
+            ) + self.get_and_gate(v, q, t, l)
+            trial = self.k if l is None else (self.k + l)
+            total_random_bit = trial * (u * math.floor(n / g) + v)
+            # print('g', g)
+            # print('complexity', total_push_time)
+            # print('total_push_time', total_push_time2)
+            # print(f'g:{g}  complexity:{total_push_time}  total_push_time:{total_push_time}')
+
+            if i == 1 or total_push_time < min_push_time:
+                min_random_bit = total_random_bit
+                min_push_time = total_push_time
+                opt_g = g
+                opt_q = q
+                opt_u = u
+                opt_v = v
+
+        # print('opt g', opt_g)
+        # print('opt q', opt_q)
+        # print('opt u', opt_u)
+        # print('opt v', opt_v)
+
+        self.compare_ostack_and_direct(min_push_time, opt_u, opt_v, opt_g, opt_q)
+        return opt_g, opt_q, opt_u, opt_v, min_push_time, min_random_bit
+
+    def compare_ostack_and_direct(self, com_ostack, u, v, g, q):
+        com_direct = self.n * self.k * self.acc
+        bit_direct = self.n * self.k * self.acc
+        bit_ostack = (u * math.floor(self.n / g) + v) * self.k
+        print(
+            f"direct ** communication: {com_direct}, random bit: {bit_direct}, totol: {com_direct+bit_direct}"
+        )
+        print(
+            f"ostack ** communication: {com_ostack}, random bit: {bit_ostack}, total: {com_ostack+bit_ostack}"
+        )
+        if com_direct + bit_direct < com_ostack + bit_ostack:
+            print("use direct")
+        else:
+            print("use ostack")
+        return com_direct > com_ostack
     
     def pre_and_gate(self, n, mechanism):
         p_ = 0
