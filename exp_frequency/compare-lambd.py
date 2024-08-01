@@ -5,6 +5,7 @@ import math
 import re
 import pandas as pd
 from collections import defaultdict
+import random
 
 def count_frequencies(filename):
     frequencies = defaultdict(int)
@@ -16,8 +17,11 @@ def count_frequencies(filename):
                 frequencies[num] += 1
     for key, value in frequencies.items():
         f.append(value)
-    
-    return np.array(f)
+    f = np.array(f)
+    print(f)
+    np.random.shuffle(f)
+    return f[:4096]
+
 
 data = count_frequencies('exp_frequency/dataset/kosarak.txt')
 ddp_log_path_gauss = 'exp_frequency/gauss/ddp_noise_lambd/'
@@ -40,6 +44,25 @@ def parse_ddp_log(path):
     numbers = np.array(numbers)
     perturbed_data = numbers[-n_sample:] + data
 
+    return query_MSE(perturbed_data, data)
+
+def parse_ddp_log_gauss(path):
+    numbers = []
+    pattern = re.compile(r'^\d+,\s*(-?\d+)$')
+    with open(path, 'r') as file:
+        for line in file:
+            line = line.strip()
+            match = pattern.match(line)
+            if match:  
+                number = int(line.split(',')[1])
+                acc = int(line.split(',')[0])
+                if acc == 1:
+                    number = number if random.random() < 0.5 else -number
+                    numbers.append(number)
+    numbers = np.array(numbers)
+    # print(numbers)
+    perturbed_data = numbers[-n_sample:] + data
+    # print(np.var(numbers[-n_sample:]))s
     return query_MSE(perturbed_data, data)
 
 
@@ -67,7 +90,7 @@ def parse_ldp(filename):
 if __name__ == '__main__':
     mses = []
     names = []
-    lambds = [2, 4, 8, 16, 32, 64, 128, 256]
+    lambds = [2, 4, 8, 16, 32]
 
     ## ddp lap
     for name in os.listdir(ddp_log_path_lap):
@@ -88,7 +111,10 @@ if __name__ == '__main__':
         for l in lambds:
             lambd = str(l)
             name_eps_path = os.path.join(name_path, lambd) + '/out.log'
-            mse = parse_ddp_log(name_eps_path)
+            if name == 'odo' or name == 'ostack1':
+                mse = parse_ddp_log_gauss(name_eps_path)
+            else:
+                mse = parse_ddp_log(name_eps_path)
             mses_eps.append(mse)
         mses.append(mses_eps)
         names.append('gauss' + '-' + str(name) )
@@ -99,4 +125,4 @@ if __name__ == '__main__':
     for i in range(3):
         ans = mses[:, :, i]
         df = pd.DataFrame(ans, index=names, columns=lambds)
-        df.to_csv(f"exp_frequency/plots/compare-{matrix[i]}-lambd.csv")
+        df.to_csv(f"exp_frequency/compare-{matrix[i]}-lambd.csv")

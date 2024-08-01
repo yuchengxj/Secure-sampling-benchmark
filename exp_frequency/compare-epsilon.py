@@ -5,6 +5,7 @@ import math
 import re
 import pandas as pd
 from collections import defaultdict
+import random
 
 def count_frequencies(filename):
     frequencies = defaultdict(int)
@@ -16,8 +17,10 @@ def count_frequencies(filename):
                 frequencies[num] += 1
     for key, value in frequencies.items():
         f.append(value)
-    
-    return np.array(f)
+    f = np.array(f)
+    print(f)
+    np.random.shuffle(f)
+    return f[:4096]
 
 data = count_frequencies('exp_frequency/dataset/kosarak.txt')
 ddp_log_path_gauss = 'exp_frequency/gauss/ddp_noise_eps/'
@@ -41,12 +44,12 @@ def parse_ddp_log(path):
                 numbers.append(int(line))
     numbers = np.array(numbers)
     perturbed_data = numbers[-n_sample:] + data
-
+    # print(np.var(numbers[-n_sample:]))s
     return query_MSE(perturbed_data, data)
 
 
 def query_MSE(noised_res, res):  
-
+    # noised_res = np.round(np.clip(noised_res, a_max=None, a_min=0))
     mse = np.mean((res - noised_res) ** 2)
     re = np.mean(np.abs((res - noised_res) / res)) * 100
     mae = np.mean(np.abs(res - noised_res))
@@ -62,9 +65,27 @@ def parse_ldp(filename):
                 first_number = float(line.split()[0])  
                 first_numbers.append([first_number]*3)
 
-    first_numbers_array = np.array(first_numbers)
-    return first_numbers_array
+    # first_numbers_array = np.array(first_numbers)
+    return first_numbers
 
+def parse_ddp_log_gauss(path):
+    numbers = []
+    pattern = re.compile(r'^\d+,\s*(-?\d+)$')
+    with open(path, 'r') as file:
+        for line in file:
+            line = line.strip()
+            match = pattern.match(line)
+            if match:  
+                number = int(line.split(',')[1])
+                acc = int(line.split(',')[0])
+                if acc == 1:
+                    number = number if random.random() < 0.5 else -number
+                    numbers.append(number)
+    numbers = np.array(numbers)
+    # print(numbers)
+    perturbed_data = numbers[-n_sample:] + data
+    # print(np.var(numbers[-n_sample:]))s
+    return query_MSE(perturbed_data, data)
 
 if __name__ == '__main__':
     mses = []
@@ -111,7 +132,12 @@ if __name__ == '__main__':
         for e in [0.1, 0.2, 0.3, 0.4, 0.5]:
             eps = str(e)
             name_eps_path = os.path.join(name_path, eps) + '/out.log'
-            mse = parse_ddp_log(name_eps_path)
+            # print(name)
+
+            if name == 'odo' or name == 'ostack1':
+                mse = parse_ddp_log_gauss(name_eps_path)
+            else:
+                mse = parse_ddp_log(name_eps_path)
             mses_eps.append(mse)
         mses.append(mses_eps)
         names.append('gauss' + '-' + str(name) )
@@ -124,11 +150,13 @@ if __name__ == '__main__':
     mses.append(mses_shuffle)
     names.append('ldp')
     names.append('shuffle')
-    mses = np.array(mses)
 
+    # mses = np.array(mses)
+    print([len(l) for l in mses])
+    mses = np.array(mses)
     epsilons = [0.1, 0.2, 0.3, 0.4, 0.5]
     matrix = ['mse', 're', 'mae']
     for i in range(3):
         ans = mses[:, :, i]
         df = pd.DataFrame(ans, index=names, columns=epsilons)
-        df.to_csv(f"exp_frequency/plots/compare-{matrix[i]}-epsilon.csv")
+        df.to_csv(f"exp_frequency/compare-{matrix[i]}-epsilon.csv")

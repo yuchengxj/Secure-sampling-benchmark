@@ -1,17 +1,11 @@
 # Secure Sampling Benchmark
 
-This is the code of paper 'Benchmarking Secure Sampling Protocols for Differential Privacy', written in [MP-SDPZ framework](https://github.com/data61/MP-SPDZ). It can be used to evaluate and compare the performance of sampling protocols. Also, you can use it as a library in your own MPC protocols that need differential privacy.
+This is the code of the paper 'Benchmarking Secure Sampling Protocols for Differential Privacy', written in [MP-SDPZ framework](https://github.com/data61/MP-SPDZ). It can be used to evaluate and compare the performance of sampling protocols. Also, you can use it as a library in your own MPC protocols that need differential privacy.
 
 
 ### Setup
 
-numpy and matplotlib libraries are required.
-Also you should have MP-SPDZ correctly installed. See its [documnet](https://mp-spdz.readthedocs.io/en/latest) for installation. Put all the project files under your MP-SPDZ directory.
-First, generate enough input random bits (inputs of computing parties). 
-
-```
-python random_bit.py <number of bits> <number of parties> 
-```
+Run scripts ```bash install.sh``` to automatically install and setup [MP-SDPZ](https://github.com/data61/MP-SPDZ). It then takes some time to generate enough random bits used by sampling protocols (you can modify the ```n = int(1e8)``` in random_bit.py to reduce the generating time). 
 
 ### Run protocols
 
@@ -38,7 +32,7 @@ The most important parameters are:
 
 Other parameters (bit length presenting samples, accuracy of bernoulli sampling etc.) will be automatically chosed and optimized by the program.
 
-Compilition will compute optimized parameters, decide input (operation) size, and generate bytecodes for execution.
+The compilation will compute optimized parameters, decide input (operation) size, and generate bytecodes for execution.
 
 #### Run compiled protocol
 Run the protocol and check the time and communication.
@@ -53,14 +47,14 @@ make yao-party.x
 bash Scripts/yao.sh -v test-sampling-main -IF <path of input random bits or partial noise> 
 ```
 
-### Get main results in the paper
+### Get the main results in the paper
 
 #### 1. Comparison under different $\lambda$ and $n$
 
 ```exp-comparison-lambda-n``` contains scripts for **Section 7.2 Efficiency of Sampling Protocols**. 
 
 
-Run ```python exp-comparison-lambda-n/plot.py``` to get Figure 2 (a)(b)(c) from the log files, the figures will be saved in exp-comparison-lambda-n/plots.
+Run ```python exp-comparison-lambda-n/plot.py``` to get Figure 2 (a)(b)(c) from the log files. The figures will be saved in exp-comparison-lambda-n/plots.
 
 To re-run the whole experiment, run ```bash exp-comparison-lambda-n/compare.sh``` (You can also read compare.sh to see how to use these protocols).
 
@@ -71,7 +65,7 @@ To re-run the whole experiment, run ```bash exp-comparison-lambda-n/compare.sh``
 Run ```python exp-epsilon/plot.py``` to get Figure 5, the figures will be saved in exp-epsilon/plots.
 
 
-#### 3. Comparison under different number of participants
+#### 3. Comparison under different numbers of participants
 
 ```exp-party``` contains scripts for **Section 7.5 Varying the Number of Computing Parties**. 
 
@@ -80,14 +74,14 @@ Run ```python exp-epsilon/plot.py``` to get Figure 6, the figures will be saved 
 
 #### 4. Compare the utility of DDP, CDP, shuffle DP, and LDP
 
-Run ```python exp_frequency/compare-epsilon.py``` and ```python exp_frequency/compare-lambd.py```. The results are six scv files (already generated) saving the MSE, RE, and MAE of frequency query using DDP, CDP, shuffle DP, and LDP under different $\epsilon$ and $\lambda$.
+Run ```python exp_frequency/compare-epsilon.py``` and ```python exp_frequency/compare-lambd.py```. The results are six csv files (already generated) saving the MSE, RE, and MAE of frequency query using DDP, CDP, shuffle DP, and LDP under different $\epsilon$ and $\lambda$.
 You can als run ```bash exp_frequency/run_ddp_eps.sh``` and ```bash exp_frequency/run_ddp_lambd.sh``` to re-run all the protocols.
 
-It is a more completed version of **Section 7.6 Utility of Distributed DP: Case Study**, we are revising this Section.
+It is a more complete version of **Section 7.6 Utility of Distributed DP: Case Study**; we are revising this Section.
 
 ### Use Secure Sampling Benchmark as a Library
 
-Import ```primitives_mpc``` into your code written with MP-SDPZ and use `binary=1` for binary and `binary=0` for arithmetics protocols. For example, you can add discrete laplace to the secret Array X. 
+Import ```primitives_mpc``` into your code written with MP-SDPZ and use `binary=1` for binary and `binary=0` for arithmetics protocols. For example, you can add a discrete Laplace to the secret Array X. 
 ```python
 import primitives_mpc
 

@@ -8,6 +8,7 @@ from Compiler.program import Program
 from decimal import *
 from mpmath import *
 from primitives_mpc import bitwise_sample, distributed_sample
+mp.dps = 50
 
 usage = "usage: %prog [options] [args]"
 compiler = Compiler(usage=usage)
@@ -137,7 +138,7 @@ compiler.parser.add_option(
 
 compiler.parse_args()
 
-@compiler.register_function("test-sampling-main-semi")
+@compiler.register_function("test-sampling-main")
 def test_sampling_main():
 
     args = compiler.options

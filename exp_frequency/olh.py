@@ -1,6 +1,7 @@
 import argparse
 import math
 import numpy as np
+import xxhash
 from fo.fo_factory import FOFactory
 domain = 0
 epsilon = 0.0

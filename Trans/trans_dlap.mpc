@@ -13,19 +13,15 @@ class log_generator(object):
         self.partial_noise, self.output_path = conf.partial_noise, conf.output_path
         self.t = conf.sensitivity / conf.epsilon
         p = exp(1 / self.t)
-        # 在transformation生成dlap时，统计距离主要来自sfix的 截断 和 离散化 操作
-        # 根据统计距离来确定的指标只有 k： sfix.set_precision(k)，随后是保持不变的
         self.k = max(int(ceil(log2(self.t * ((self.lambd + 1 + log2(self.n)) - log2(1 + p)) * log(2)))),5)
         self.N = 2 ** self.k + 1
 
-        # 搞清楚如何算u！
         self.u = self.lambd + ceil(log2(self.n))
         # self.u = 8
         print(f'fraction part {self.u}')
         print(f'k derived from allocating lambda to truncation: {self.k}')
         print(f'mod clip N: {self.N}')
         
-        # 小数部分要多长，取决于需要多精准地表达 uniform sample
         sfix.set_precision(self.u, self.k + self.u)
         self.sfixu = sfix
         self.sbk = sbitint.get_type(self.k)
