@@ -5,12 +5,12 @@ This is the code of the paper 'Benchmarking Secure Sampling Protocols for Differ
 
 ### Setup
 
-Run scripts ```bash install.sh``` to automatically install and setup [MP-SDPZ](https://github.com/data61/MP-SPDZ). It then takes some time to generate enough random bits used by sampling protocols (you can modify the ```n = int(1e8)``` in random_bit.py to reduce the generating time). 
+Run the script ```bash install.sh``` to automatically install and set up [MP-SDPZ](https://github.com/data61/MP-SPDZ).  
 
 ### Run protocols
 
 #### Complie
-Compile a sampling protocol with binary computation. Set parameters for main.mpc to run different protocols (the meanings of parameters are described in main.py).
+Compile a sampling protocol with binary computation. Set parameters for ``main.mpc`` to run different protocols (the meanings of parameters are described in main.mpc).
 
 For arithmetics protocols (gc, bmr, etc.), compile with
 
@@ -32,19 +32,19 @@ The most important parameters are:
 
 Other parameters (bit length presenting samples, accuracy of bernoulli sampling etc.) will be automatically chosed and optimized by the program.
 
-The compilation will compute optimized parameters, decide input (operation) size, and generate bytecodes for execution.
+The compilation will compute optimized parameters, decide input (operation) size, and generate bytecodes for execution. It also randomly generates the inputs and saves them in Player-Data/Input-P0-0, Player-Data/Input-P1-0... 
 
 #### Run compiled protocol
 Run the protocol and check the time and communication.
 ```
 make shamir-bmr-party.x
-bash Scripts/shamir-bmr.sh -v test-sampling-main -IF Player-Data/biased-input (Player-Data/client-input (for dng))
+bash Scripts/shamir-bmr.sh -v test-sampling-main
 ```
 test-sampling-main can be executed with other protocols in Scripts, e.g. yao's protocol. 
 
 ```
 make yao-party.x
-bash Scripts/yao.sh -v test-sampling-main -IF <path of input random bits or partial noise> 
+bash Scripts/yao.sh -v test-sampling-main
 ```
 
 ### Get the main results in the paper
@@ -87,12 +87,10 @@ import primitives_mpc
 
 X = Array(n, sint)
 
-Your code saving statistical results in secret Array X 
+### Your code saving statistical results in secret Array X 
 
-noised_X = X + primitives_mpc.bitwise_sample(n=n, mechanism='lap', binary=1)
+noised_X = X + primitives_mpc.bitwise_sample(n=n, mechanism='lap', binary=1) # use bitwise sampling
 
-# or use dng
-
-noised_X = X + primitives_mpc.distributed_sample(n=n, mechanism='lap', binary=1)
+noised_X = X + primitives_mpc.distributed_sample(n=n, mechanism='lap', binary=1) # use dng
 
 ```

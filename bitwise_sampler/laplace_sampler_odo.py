@@ -21,7 +21,6 @@ class laplace_sampler_odo(basic_sampler):
         self.k = int(ceil(math.log2(self.t * ((self.lambd + 1 - math.log2(self.r1) + math.log2(self.n)) - math.log2(1 + p)) * ln(2))))
         self.sbk = sbitint.get_type(self.k+1)
         self.acc = int(ceil(self.lambd + math.log2((self.k+1) + math.log2(self.n) - math.log2(self.r2))))
-
         
         
 
@@ -108,7 +107,6 @@ class laplace_sampler_odo(basic_sampler):
                 self.decfrac2bin(p ** (2**i) / (1 + p ** (2**i)))
             )
         coins = Array(self.k * n, sbit)
-
         @for_range(self.k)
         def _(j):
             bias = geo_bias[j]
@@ -122,6 +120,7 @@ class laplace_sampler_odo(basic_sampler):
         sbk = sbitint.get_type(self.k + 1)
         laps = Array(n, sbk)
         signs = Array(n, sbit)
+        self.radnom_bit += n
         @for_range(n)
         def _(j):
             geo = coins.get_part(j * self.k, self.k)
@@ -165,6 +164,7 @@ class laplace_sampler_odo(basic_sampler):
         print('k', self.k)
         print('acc:', self.acc)
         laps = Array(n, self.sbk)
+        self.bit_count = self.n * ((self.k + 1) * self.acc + 1)
         @for_range(n)
         def _(i):
             
@@ -225,11 +225,13 @@ class laplace_sampler_odo(basic_sampler):
         print('acc:', self.acc)
         print('d: ', d)
         input_random = Array(d, sbit)
+        self.bit_counter += d
         @for_range(d)
         def _(i):
             input_random[i] = self.get_random()
 
         laps = Array(n, self.sbk)
+        self.bit_counter += n
         @for_range(n)
         def _(i):
 

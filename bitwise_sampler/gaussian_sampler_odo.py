@@ -130,8 +130,8 @@ class gauss_sampler(laplace_sampler_odo):
         self.acc = int(ceil(self.lambd + 2 + math.log2(d * self.n / p_)))
         print("acc:", self.acc)
         print("k:", self.k)
-        bitnum = 1 + self.acc * c
-        print("bitnum:", bitnum)
+        
+
 
         samples = sbitint.get_type(self.k + 1).Array(m)
         accepts = sbit.Array(m)
@@ -147,6 +147,7 @@ class gauss_sampler(laplace_sampler_odo):
             u = self.full_square(v)
             accepts[i] = self.exponential_bernoulli(u, f)
             samples[i] = sign.if_else(dlap, -dlap)
+            self.bit_count = m * ((self.k + 1) * self.acc + 1) + m * len(u.force_bit_decompose()) * self.acc
 
         out_list = sbitint.get_type(self.k + 1).Array(self.n)
         @for_range(self.n)
@@ -156,8 +157,7 @@ class gauss_sampler(laplace_sampler_odo):
             @if_((accepts[i].reveal()))
             def _():
                 out_list[i%self.n] = samples[i]
-        for i in range(self.n):
-            print_ln(
-                    "%s", out_list[i].reveal()
-                )
+        for i in range(m):
+            out_list[i%self.n] = samples[i]
+            print_ln("%s, %s", accepts[i].reveal(), samples[i].reveal())
         return out_list

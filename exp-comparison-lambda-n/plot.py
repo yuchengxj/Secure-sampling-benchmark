@@ -18,7 +18,7 @@ def extract_data_from_log(file_path):
         log_content = f.read()
     return pattern.findall(log_content)
 
-output_path = 'exp-comparison-lambda-n/plots'
+output_path = 'exp-comparison-lambda-n'
 if len(sys.argv) < 2:
     dir = 'exp-comparison-lambda-n/logs-bmr'
 else:

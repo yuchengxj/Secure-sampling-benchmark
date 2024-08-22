@@ -247,6 +247,7 @@ class laplace_sampler_ostack(basic_sampler):
         print("u", u)
         print("q", q)
         print("v", v)
+        self.bit_count = ((self.n // g) * u + v) * self.k + self.n * (1 + self.acc)
 
         sbit_acc = sbitint.get_type(self.acc)
         geo_bias = sbit_acc.Array(self.k)

@@ -9,7 +9,6 @@ from decimal import *
 from mpmath import *
 from primitives_mpc import bitwise_sample, distributed_sample
 mp.dps = 50
-
 usage = "usage: %prog [options] [args]"
 compiler = Compiler(usage=usage)
 

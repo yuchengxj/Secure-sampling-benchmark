@@ -4,11 +4,11 @@ import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 import pandas as pd
 
-plt.rcParams['font.size'] = 32 
-plt.rcParams['axes.titlesize'] = 32  
-plt.rcParams['axes.labelsize'] = 32 
-plt.rcParams['xtick.labelsize'] = 30  
-plt.rcParams['ytick.labelsize'] = 30  
+plt.rcParams['font.size'] = 32  # 默认为15
+plt.rcParams['axes.titlesize'] = 32  # 默认为大于font.size
+plt.rcParams['axes.labelsize'] = 32  # 默认为font.size
+plt.rcParams['xtick.labelsize'] = 30  # 默认为font.size
+plt.rcParams['ytick.labelsize'] = 30  # 默认为font.size
 plt.rcParams['legend.fontsize'] = 23
 
 colors = [
@@ -53,8 +53,8 @@ for log_file in log_files:
                 data_sent_data[log_file].append(global_data_sent)
                 time_data[log_file].append(time_value)
             else:
-                data_sent_data[log_file].append(0)  
-                time_data[log_file].append(0)  
+                data_sent_data[log_file].append(0)  # 未找到则设为0
+                time_data[log_file].append(0)  # 未找到则设为0
 
 df_time = pd.DataFrame(time_data, index=subdirs)
 df_data_sent = pd.DataFrame(data_sent_data, index=subdirs)
@@ -100,5 +100,5 @@ legend = ax_leg.legend(custom_handles, [value[0] for key, value in line_styles.i
 legend.get_frame().set_facecolor('#eaeaf2')
 
 plt.tight_layout()
-plt.savefig('exp-party/plots/time_com_party.png', format='png')
-plt.savefig('exp-party/plots/time_com_party.eps', format='eps')
+plt.savefig('exp-party/time_com_party.png', format='png')
+plt.savefig('exp-party/time_com_party.eps', format='eps')

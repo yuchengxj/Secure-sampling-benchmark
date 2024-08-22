@@ -52,7 +52,7 @@ def test_ostack():
         print_ln("before pop: %s, after reset: %s", L1[i].reveal(), L2[i].reveal())
     
 def test_make_batch(args):
-    sa = sampler(args)
+    sa = basic_sampler(args)
     def decfrac2bin(dec, acc):
         bin = []
         for i in range(acc):

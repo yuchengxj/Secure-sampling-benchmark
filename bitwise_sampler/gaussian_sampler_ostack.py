@@ -129,6 +129,7 @@ class gauss_sampler_ostack(laplace_sampler_ostack):
             @for_range(q)
             def _(c):
                 coins[m // g * g * length + c * length + j] = exps[c]
+        self.bit_count += (m // g * u + v) * length 
 
         return coins
 
@@ -193,8 +194,11 @@ class gauss_sampler_ostack(laplace_sampler_ostack):
         self.acc = int(ceil(self.lambd + 2 + math.log2(d * self.n / p_)))
         signs, dlaps = self.discrete_laplace_geo_ostack(m, t, g, q, u, v, num_AND, num_bit, rejection=True)
 
+        self.bit_count = ((m // g) * u + v) * self.k + m * (1 + self.acc)
+
         samples = sbitint.get_type(self.k + 1).Array(m)
         accepts = sbit.Array(m)
+        
 
         dlap = dlaps[0]
         if z >= 1:
@@ -237,13 +241,6 @@ class gauss_sampler_ostack(laplace_sampler_ostack):
         def _(i):
             out_list[i] = self.sbk(0)
         for i in range(m):
-            @if_((accepts[i].reveal()))
-            def _():
-                out_list[i%self.n] = samples[i]
-        for i in range(self.n):
-            print_ln(
-                    "%s", out_list[i].reveal()
-                )
+            out_list[i%self.n] = samples[i]
+            print_ln("%s, %s", accepts[i].reveal(), samples[i].reveal())
         return out_list
-        
-                

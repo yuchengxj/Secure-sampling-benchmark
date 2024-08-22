@@ -6,6 +6,8 @@ from Compiler.types import *
 from decimal import *
 from mpmath import *
 from bitwise_sampler.ostack import *
+import numpy as np
+
 
 class basic_sampler(object):
     def __init__(self, args, queries=None) -> None:
@@ -26,6 +28,7 @@ class basic_sampler(object):
         self.r3 = args.r3
         self.r4 = args.r4
         self.and_counter = regint(0)
+        self.bit_count = 0
 
     def decfrac2bin(self, dec):
         bin = []
@@ -50,8 +53,17 @@ class basic_sampler(object):
         uniform_bit[0] = sbit.get_input_from(0)
         for i in range(1, self.num_party):
             uniform_bit[0] = uniform_bit[0] ^ sbit.get_input_from(i)
-
         return uniform_bit[0]
+
+    def generate_input_bits(self):
+        print(self.bit_count)
+        for i in range(self.num_party):
+            output_file = 'Player-Data/Input-P' + str(i) + '-0'
+            with open(output_file, 'w') as f:
+                for j in range(self.bit_count):
+                    f.write(str(random.randint(0,1)) + ' ')
+            f.close()
+
     
 
     def debug(self, stk, n):
@@ -72,7 +84,7 @@ class basic_sampler(object):
         """
         class BiasedCoinCircuit(object):
             def __init__(self, depth, bias_probability, radnom_bit):
-                self.depth = depth  # 电路的深度
+                self.depth = depth  
                 self.bias_probability = util.bit_decompose(bias_probability)
                 self.bias_probability.reverse()
                 self.bias_index = [i for i in range(depth)]
@@ -98,7 +110,6 @@ class basic_sampler(object):
             
             def hierarchical_generate(self, num_coins, start_index=sbitint(0)):
 
-                # 捆绑d个电路实现对p扩展的oblivious访问
                 if num_coins == 0:
                     return sbit(0), 0, start_index
                 
@@ -119,13 +130,11 @@ class basic_sampler(object):
 
                     return [coin], n, start_index
 
-                # 分半递归生成硬币
                 mid = num_coins // 2
                 left_coins, left_valid, next_index = self.hierarchical_generate(mid, start_index)
                 right_coins, right_valid, final_index = self.hierarchical_generate(num_coins - mid, next_index)
                 total_coins = self.concat_coins(left_coins, right_coins, len(left_coins), len(right_coins), left_valid)                
 
-                # 合并结果和有效计数
                 total_valid = left_valid + right_valid
                 return total_coins, total_valid, final_index
             

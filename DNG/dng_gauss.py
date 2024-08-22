@@ -1,5 +1,4 @@
 import numpy as np
-from DNG.config import config
 from mpmath import *
 from math import exp, log2, log, ceil, sqrt
 import math
@@ -18,7 +17,6 @@ class dgauss_generator(object):
             args.sensitivity * math.sqrt(2 * ln(1.25 / args.delta)) / args.epsilon
         )
 
-        # 目标是DGauss分布，和目标分布的统计距离只来自截断
         print("sigma", self.sigma)
         print(sqrt(2 * ln(2) * (self.lambd + 2 + log2(self.n))) * self.sigma - 1)
         self.k = max(
@@ -45,7 +43,7 @@ class dgauss_generator(object):
     def output_pn_to_clients(self, noise):
         signs = noise > 0
         for i in range(self.m):
-            with open(f'Player-Data/client-input-P{i}-0', 'w') as f:
+            with open(f'Player-Data/Input-P{i}-0', 'w') as f:
                 for j in range(self.n):
                     f.write(str(int(signs[i][j])) + " ")
                     f.write(str(abs(noise[i][j])) + " ")
@@ -62,7 +60,6 @@ class dgauss_generator(object):
         self.output_pn_to_clients(noise)
 
     def simulate_aggregate_discrete(self, simulate):
-        print("!!!!!!!!!!")
         for s in range(simulate):
             print(f"{s} colluded")
             scale = self.n / (self.n - s)

@@ -4,7 +4,7 @@ from bitwise_sampler.laplace_sampler_ostack import *
 from bitwise_sampler.gaussian_sampler_ostack import *
 from bitwise_sampler.gaussian_sampler_odo import *
 from bitwise_sampler.AND_gate_counter import *
-from bitwise_sampler.test_ostack import *
+# from bitwise_sampler.test_ostack import *
 from DNG.dng_dlap import dlap_generator
 from DNG.dng_gauss import dgauss_generator
 
@@ -69,6 +69,8 @@ def bitwise_sample(mechanism='lap', n=4096, s=1, epsilon=0.1, delta=1e-5, lambd=
         else:
             sa = gauss_sampler(option)
             ans = sa.discrete_gaussian_dlap_rejection()
+
+    sa.generate_input_bits()
 
     return dtype_convert(ans, binary)
 

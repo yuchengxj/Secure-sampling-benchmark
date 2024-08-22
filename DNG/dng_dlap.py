@@ -16,7 +16,6 @@ class dlap_generator(object):
         self.t = args.sensitivity / args.epsilon
         p = exp(1 / self.t)
 
-        # 目标是DLaplace分布，和目标分布的统计距离只来自截断
         self.k = int(ceil(log2(self.t * ((self.lambd + 1 + log2(self.n)) - log2(1 + p)) * log(2))))
         self.sbg = sbitint.get_type(self.k)
         self.sbl = sbitint.get_type(self.k+1)
@@ -31,7 +30,7 @@ class dlap_generator(object):
     def output_pn_to_clients(self, noise):
         signs = noise > 0
         for i in range(self.m):
-            with open(f'Player-Data/client-input-P{i}-0', 'w') as f:
+            with open(f'Player-Data/Input-P{i}-0', 'w') as f:
                 for j in range(self.n):
                     f.write(str(int(signs[i][j])) + ' ')
                     f.write(str(abs(noise[i][j])) + ' ')

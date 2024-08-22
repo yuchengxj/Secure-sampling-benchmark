@@ -18,7 +18,7 @@ for lambd in "${LAMBDAS[@]}"; do
         echo "Running with n=$n and lambd=$lambd" >> "$output_file"
         echo "========================================" >> "$output_file"
         python main.mpc -B 64 --num_party $nparty --type bitwise --mechanism lap --lambd $lambd --n $n --ostack 1 >> "$output_file"
-        bash Scripts/shamir-bmr.sh -v test-sampling-main -IF Player-Data/biased-input -N $nparty >> "$output_file"
+        bash Scripts/shamir-bmr.sh -v test-sampling-main  -N $nparty >> "$output_file"
         echo "----------------------------------------" >> "$output_file"
     done
 done
@@ -32,7 +32,7 @@ for lambd in "${LAMBDAS[@]}"; do
         echo "Running with n=$n and lambd=$lambd" >> "$output_file"
         echo "========================================" >> "$output_file"
         python main.mpc -B 64 --num_party $nparty --type bitwise --mechanism lap --lambd $lambd --n $n --ostack 1 --periodic 1 >> "$output_file"
-        bash Scripts/shamir-bmr.sh -v test-sampling-main -IF Player-Data/biased-input -N $nparty >> "$output_file"
+        bash Scripts/shamir-bmr.sh -v test-sampling-main  -N $nparty >> "$output_file"
         echo "----------------------------------------" >> "$output_file"
     done
 done
@@ -46,7 +46,7 @@ for lambd in "${LAMBDAS[@]}"; do
         echo "Running with n=$n and lambd=$lambd" >> "$output_file"
         echo "========================================" >> "$output_file"
         python main.mpc -B 64 --num_party $nparty --type bitwise --mechanism lap --lambd $lambd --n $n --ostack 0 >> "$output_file"
-        bash Scripts/shamir-bmr.sh -v test-sampling-main -IF Player-Data/biased-input -N $nparty >> "$output_file"
+        bash Scripts/shamir-bmr.sh -v test-sampling-main  -N $nparty >> "$output_file"
         echo "----------------------------------------" >> "$output_file"
     done
 done
@@ -61,7 +61,7 @@ for lambd in "${LAMBDAS[@]}"; do
         echo "Running with n=$n and lambd=$lambd" >> "$output_file"
         echo "========================================" >> "$output_file"
         python main.mpc -B 64 --num_party $nparty --type bitwise --mechanism gauss --lambd $lambd --n $n --ostack 1 >> "$output_file"
-        bash Scripts/shamir-bmr.sh -v test-sampling-main -IF Player-Data/biased-input -N $nparty >> "$output_file"
+        bash Scripts/shamir-bmr.sh -v test-sampling-main  -N $nparty >> "$output_file"
         echo "----------------------------------------" >> "$output_file"
     done
 done
@@ -76,7 +76,7 @@ for lambd in "${LAMBDAS[@]}"; do
         echo "Running with n=$n and lambd=$lambd" >> "$output_file"
         echo "========================================" >> "$output_file"
         python main.mpc -B 64 --num_party $nparty --type bitwise --mechanism gauss --lambd $lambd --n $n --ostack 0 >> "$output_file"
-        bash Scripts/shamir-bmr.sh -v test-sampling-main -IF Player-Data/biased-input -N $nparty >> "$output_file"
+        bash Scripts/shamir-bmr.sh -v test-sampling-main  -N $nparty >> "$output_file"
         echo "----------------------------------------" >> "$output_file"
     done
 done
@@ -90,7 +90,7 @@ for lambd in "${LAMBDAS[@]}"; do
         echo "Running with n=$n and lambd=$lambd" >> "$output_file"
         echo "========================================" >> "$output_file"
         python main.mpc -B 64 --num_party $nparty --type dng --mechanism gauss --lambd $lambd --n $n --ostack 0 --periodic 1 --bin 1 >> "$output_file"
-        bash Scripts/shamir-bmr.sh -v test-sampling-main -IF Player-Data/client-input -N $nparty >> "$output_file"
+        bash Scripts/shamir-bmr.sh -v test-sampling-main -N $nparty >> "$output_file"
         echo "----------------------------------------" >> "$output_file"
     done
 done
@@ -105,7 +105,7 @@ for lambd in "${LAMBDAS[@]}"; do
         echo "Running with n=$n and lambd=$lambd" >> "$output_file"
         echo "========================================" >> "$output_file"
         python main.mpc -B 64 --num_party $nparty --type dng --mechanism lap --lambd $lambd --n $n --ostack 0 --periodic 1 --bin 1 >> "$output_file"
-        bash Scripts/shamir-bmr.sh -v test-sampling-main -IF Player-Data/client-input -N $nparty >> "$output_file"
+        bash Scripts/shamir-bmr.sh -v test-sampling-main -N $nparty >> "$output_file"
         echo "----------------------------------------" >> "$output_file"
     done
 done
