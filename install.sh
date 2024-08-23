@@ -12,5 +12,6 @@ sudo apt-get install -y automake build-essential clang cmake git libboost-dev li
 make setup &&
 mkdir Player-Data
 sudo bash Scripts/setup-ssl.sh 16 &&
+sudo chmod -R 777 Player-Data
 make -j8 shamir-bmr-party.x &&
 make -j8 yao-party.x
