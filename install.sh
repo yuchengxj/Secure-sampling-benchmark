@@ -12,4 +12,4 @@ sudo apt-get install -y automake build-essential clang cmake git libboost-dev li
 sudo make setup &&
 sudo bash Scripts/setup-ssl.sh 16 &&
 make -j8 shamir-bmr-party.x &&
-make -j8 yao-party.x &&
+make -j8 yao-party.x
