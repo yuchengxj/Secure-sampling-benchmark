@@ -5,7 +5,7 @@ This is the code of the paper 'Benchmarking Secure Sampling Protocols for Differ
 
 ### Setup
 
-Run the script ```bash install.sh``` to automatically install and set up [MP-SDPZ](https://github.com/data61/MP-SPDZ).  
+The conda is required to be installed first. Run the script ```bash install.sh``` to automatically install and set up [MP-SDPZ](https://github.com/data61/MP-SPDZ). Then, activate the conda eviroment by ```conda activate sampling-py ```
 
 ### Run protocols
 
