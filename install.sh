@@ -9,7 +9,8 @@ cp -r MP-SPDZ/* . &&
 sudo rm -r MP-SPDZ &&
 sudo apt update &&
 sudo apt-get install -y automake build-essential clang cmake git libboost-dev libboost-all-dev libboost-iostreams-dev libboost-thread-dev libgmp-dev libntl-dev libsodium-dev libssl-dev libtool python3 &&
-sudo make setup &&
+make setup &&
+mkdir Player-Data
 sudo bash Scripts/setup-ssl.sh 16 &&
 make -j8 shamir-bmr-party.x &&
 make -j8 yao-party.x
