@@ -1,9 +1,9 @@
 #!/bin/bash
 
-conda env remove -n sampling-py
-conda create -y -n sampling-py python=3.9
-conda activate sampling-py
-conda install -y matplotlib==3.6.1 mpmath==1.3.0 numpy==1.22.4 scipy==1.7.1 pandas
+conda env remove -n sampling-py &&
+conda create -y -n sampling-py python=3.9 &&
+conda activate sampling-py &&
+conda install -y matplotlib==3.6.1 mpmath==1.3.0 numpy==1.22.4 scipy==1.7.1 pandas &&
 git clone https://github.com/data61/MP-SPDZ.git &&
 cp -r MP-SPDZ/* . &&
 sudo rm -r MP-SPDZ &&
